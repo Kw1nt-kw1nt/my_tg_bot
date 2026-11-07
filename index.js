@@ -1,5 +1,5 @@
 const TelegramBot = require('node-telegram-bot-api');
-const Datastore = require('nedb-aster');
+const Datastore = require('nedb')
 
 // ⚠️ ВСТАВЬ СЮДА СВОЙ ТОКЕН ОТ @BotFather МЕЖДУ КАВЫЧКАМИ
 const token = '8790945251:AAEXXr-nWJt0DOX1js6PV2We03-9dWtxmj0'; 
