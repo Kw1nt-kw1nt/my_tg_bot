@@ -2,7 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const Datastore = require('nedb');
 
 // Твой токен от BotFather
-const token = '8790945251:AAF83uifgaVJucNG7sOTb0SdwFf88t4IB60'; 
+const token = '8790945251:AAFScFH_J5QAFlz7t4a_OTCcQpyGEBlWWe0'; 
 const bot = new TelegramBot(token, { polling: { params: { offset: -1 } } });
 const db = new Datastore({ filename: 'database.db', autoload: true });
 
