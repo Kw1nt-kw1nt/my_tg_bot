@@ -3,7 +3,7 @@ const Datastore = require('nedb');
 
 // Твой токен от BotFather
 const token = '8790945251:AAF83uifgaVJucNG7sOTb0SdwFf88t4IB60'; 
-const bot = new TelegramBot(token, { polling: true });
+const bot = new TelegramBot(token, { polling: { params: { offset: -1 } } });
 const db = new Datastore({ filename: 'database.db', autoload: true });
 
 // Создаем веб-сервер для UptimeRobot, чтобы бот работал 24/7
