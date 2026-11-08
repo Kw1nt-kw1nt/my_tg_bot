@@ -1,18 +1,18 @@
 const TelegramBot = require('node-telegram-bot-api');
-const Datastore = require('nedb');
 const { Client } = require('pg');
 
-// 1. СЮДА ВСТАВЬ СВОЮ ДЛИННУЮ СТРОКУ ИЗ POSTGRES (External Connection URI)
-const dbUri = 'postgresql://databot_3r9k_user:lHTgaZ7Sh7lnJVbJhally9LPJjNhc6aj@dpg-dbo1urou01pc73e28g6g-a/databot_3r9k'; 
+// 1. Твой токен от BotFather
+const token = '8790945251:AAFScFH_J5QAFlz7t4a_OTCcQpyGEBlWWe0';
+// 2. Твоя строка из Postgres
+const dbUri = 'postgresql://databot_3r9k_user:lHTgaZ7Sh7lnJVbJhally9LPJjNhc6aj@dpg-dbo1urou01pc73e28g6g-a/databot_3r9k'; // Твоя длинная ссылка, которая сейчас на скрине в 6 строке
 
 const pgClient = new Client({ connectionString: dbUri, ssl: { rejectUnauthorized: false } });
 pgClient.connect().then(() => {
   pgClient.query(`CREATE TABLE IF NOT EXISTS users (id BIGINT PRIMARY KEY, data JSONB);`);
 }).catch(err => console.error('Ошибка БД:', err));
 
-// 2. А ВОТ ТВОЯ НОВАЯ 7-Я СТРОКА (Она уже вшита сюда и создаёт бота правильно!)
+// 3. Твоя обновленная строка создания бота
 const bot = new TelegramBot(token, { polling: false });
-
 // Наш бессмертный переходник под твой существующий код (db.find, db.findOne и т.д.)
 const db = {
   find: (query, callback) => {
