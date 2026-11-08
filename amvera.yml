@@ -1,0 +1,12 @@
+meta:
+  environment: node
+  toolchain:
+    name: node
+    version: 18
+build:
+  requirements:
+    - package.json
+  steps:
+    - npm install
+run:
+  script: node index.js
