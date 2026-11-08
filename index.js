@@ -3,7 +3,18 @@ const Datastore = require('nedb');
 
 // Твой токен от BotFather
 const token = '8790945251:AAFScFH_J5QAFlz7t4a_OTCcQpyGEBlWWe0'; 
-const bot = new TelegramBot(token, { polling: { params: { offset: -1 } } });
+// Переключаем polling в false при создании, чтобы запустить его вручную ПОСЛЕ очистки
+const bot = new TelegramBot(token, { polling: false }); 
+
+// Жестко сносим старые вебхуки Render, чтобы убрать ошибку 409
+bot.deleteWebHook()
+  .then(() => {
+    console.log("Старые вебхуки удалены!");
+    // Запускаем пуллинг только после удаления вебхука
+    bot.startPolling({ restart: true });
+    console.log("Бот успешно запущен в режиме пуллинга!");
+  })
+  .catch((err) => console.log("Ошибка вебхука:", err));
 const db = new Datastore({ filename: 'database.db', autoload: true });
 
 // Создаем веб-сервер для UptimeRobot, чтобы бот работал 24/7
