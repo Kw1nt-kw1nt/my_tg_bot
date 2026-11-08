@@ -2,7 +2,7 @@ const TelegramBot = require('node-telegram-bot-api');
 const { Client } = require('pg');
 
 // 1. Твой токен от BotFather
-const token = '8790945251:AAFScFH_J5QAFlz7t4a_OTCcQpyGEBlWWe0';
+const token = '8790945251:AAGyhbu0-0lIO-u5va8MAJBWd6wXJYB1_Vw';
 // 2. Твоя строка из Postgres
 const dbUri = 'postgresql://databot_3r9k_user:lHTgaZ7Sh7lnJVbJhally9LPJjNhc6aj@dpg-dbo1urou01pc73e28g6g-a/databot_3r9k'; // Твоя длинная ссылка, которая сейчас на скрине в 6 строке
 
