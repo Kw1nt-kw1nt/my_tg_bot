@@ -495,12 +495,19 @@ bot.on('callback_query', (query) => {
     }
 });
 
-// Жестко сносим старые вебхуки Render и запускаем пуллинг БЕЗ 409 ошибки
-bot.deleteWebHook()
-  .then(() => {
-    console.log("Старые вебхуки удалены!");
-    bot.startPolling({ restart: true, skip_pending: true });
-    console.log("Бот успешно запущен в режиме пуллинга!");
-  })
-  .catch((err) => console.log("Ошибка вебхука:", err));
+// Настройка вебхука для Vercel (URL заменим в следующем шаге, пока оставь так)
+const VERCEL_URL = 'https://vercel.app'; 
+bot.setWebHook(`${VERCEL_URL}/api/webhook`).catch(err => console.error(err));
 
+// Экспортируем функцию, которую Vercel будет вызывать при каждом сообщении от Telegram
+module.exports = async (req, res) => {
+  try {
+    if (req.method === 'POST' && req.body) {
+      bot.processUpdate(req.body);
+    }
+    res.status(200).send('OK');
+  } catch (err) {
+    console.error('Ошибка вебхука:', err);
+    res.status(500).send('Error');
+  }
+};
