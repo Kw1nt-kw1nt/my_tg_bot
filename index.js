@@ -3,7 +3,7 @@ const Datastore = require('nedb');
 const { Client } = require('pg');
 
 // 1. СЮДА ВСТАВЬ СВОЮ ДЛИННУЮ СТРОКУ ИЗ POSTGRES (External Connection URI)
-const dbUri = 'postgresql://строка_которую_ты_скопировал_на_render'; 
+const dbUri = 'postgresql://databot_3r9k_user:lHTgaZ7Sh7lnJVbJhally9LPJjNhc6aj@dpg-dbo1urou01pc73e28g6g-a/databot_3r9k'; 
 
 const pgClient = new Client({ connectionString: dbUri, ssl: { rejectUnauthorized: false } });
 pgClient.connect().then(() => {
@@ -494,3 +494,13 @@ bot.on('callback_query', (query) => {
         activeTrades.delete(userId); bot.deleteMessage(query.message.chat.id, query.message.message_id);
     }
 });
+
+// Жестко сносим старые вебхуки Render и запускаем пуллинг БЕЗ 409 ошибки
+bot.deleteWebHook()
+  .then(() => {
+    console.log("Старые вебхуки удалены!");
+    bot.startPolling({ restart: true, skip_pending: true });
+    console.log("Бот успешно запущен в режиме пуллинга!");
+  })
+  .catch((err) => console.log("Ошибка вебхука:", err));
+
