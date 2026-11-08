@@ -1,21 +1,53 @@
 const TelegramBot = require('node-telegram-bot-api');
 const Datastore = require('nedb');
+const { Client } = require('pg');
 
-// Твой токен от BotFather
-const token = '8790945251:AAFScFH_J5QAFlz7t4a_OTCcQpyGEBlWWe0'; 
-// Переключаем polling в false при создании, чтобы запустить его вручную ПОСЛЕ очистки
-const bot = new TelegramBot(token, { polling: false }); 
+// 1. СЮДА ВСТАВЬ СВОЮ ДЛИННУЮ СТРОКУ ИЗ POSTGRES (External Connection URI)
+const dbUri = 'postgresql://строка_которую_ты_скопировал_на_render'; 
 
-// Жестко сносим старые вебхуки Render, чтобы убрать ошибку 409
-bot.deleteWebHook()
-  .then(() => {
-    console.log("Старые вебхуки удалены!");
-    // Запускаем пуллинг только после удаления вебхука
-    bot.startPolling({ restart: true });
-    console.log("Бот успешно запущен в режиме пуллинга!");
-  })
-  .catch((err) => console.log("Ошибка вебхука:", err));
-const db = new Datastore({ filename: 'database.db', autoload: true });
+const pgClient = new Client({ connectionString: dbUri, ssl: { rejectUnauthorized: false } });
+pgClient.connect().then(() => {
+  pgClient.query(`CREATE TABLE IF NOT EXISTS users (id BIGINT PRIMARY KEY, data JSONB);`);
+}).catch(err => console.error('Ошибка БД:', err));
+
+// 2. А ВОТ ТВОЯ НОВАЯ 7-Я СТРОКА (Она уже вшита сюда и создаёт бота правильно!)
+const bot = new TelegramBot(token, { polling: false });
+
+// Наш бессмертный переходник под твой существующий код (db.find, db.findOne и т.д.)
+const db = {
+  find: (query, callback) => {
+    pgClient.query('SELECT data FROM users').then(res => {
+      const docs = res.rows.map(r => r.data);
+      callback(null, docs);
+    }).catch(err => callback(err, null));
+  },
+  findOne: (query, callback) => {
+    const searchId = query.userId || query.id || query.chatId;
+    pgClient.query('SELECT data FROM users WHERE id = $1', [searchId]).then(res => {
+      callback(null, res.rows.length ? res.rows.data : null);
+    }).catch(err => callback(err, null));
+  },
+  insert: (doc, callback) => {
+    const id = doc.userId || doc.id || doc.chatId;
+    pgClient.query('INSERT INTO users (id, data) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET data = $2', [id, JSON.stringify(doc)]).then(() => {
+      callback(null, doc);
+    }).catch(err => callback(err, null));
+  },
+  update: (query, updateDoc, options, callback) => {
+    const id = query.userId || query.id || query.chatId;
+    pgClient.query('SELECT data FROM users WHERE id = $1', [id]).then(res => {
+      let currentData = res.rows.length ? res.rows.data : {};
+      if (updateDoc.$set) currentData = { ...currentData, ...updateDoc.$set };
+      pgClient.query('INSERT INTO users (id, data) VALUES ($1, $2) ON CONFLICT (id) DO UPDATE SET data = $2', [id, JSON.stringify(currentData)]).then(() => {
+        if (typeof options === 'function') options(null, 1);
+        else if (callback) callback(null, 1);
+      });
+    }).catch(err => {
+      if (typeof options === 'function') options(err, null);
+      else if (callback) callback(err, null);
+    });
+  }
+};
 
 // Создаем веб-сервер для UptimeRobot, чтобы бот работал 24/7
 const http = require('http');
